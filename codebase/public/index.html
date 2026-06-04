@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TripEscape AI — Trợ lý lập lịch trình đi trốn ngắn ngày</title>
+
+    <!-- Meta SEO -->
+    <meta name="description"
+        content="Trợ lý AI lập lịch trình đi biển miền Bắc 3 ngày 2 đêm từ Hà Nội/Hưng Yên bằng xe máy hoặc ô tô tự lái. Tích hợp tính chi phí, độ mệt mỏi và sửa đổi nhanh.">
+    <meta name="keywords" content="TripEscape AI, du lich miên bac, lap lich trinh du lich, ai travel planner">
+    <meta name="author" content="ColorOfDreams">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- App Glow Effect Backgrounds -->
+    <div class="glow-bg glow-1"></div>
+    <div class="glow-bg glow-2"></div>
+    <div class="glow-bg glow-3"></div>
+
+    <div class="app-container">
+        <!-- Sidebar / Control Panel -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-compass fa-spin-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="brand-name">TripEscape <span class="accent-text">AI</span></h1>
+                    <p class="brand-tagline">Trợ lý</p>
+                </div>
+            </div>
+
+            <!-- API Configuration Status Card -->
+            <div class="sidebar-card api-card">
+                <h3><i class="fa-solid fa-server"></i> Trạng thái AI Engine</h3>
+                <div class="mode-indicator" id="mode-badge">
+                    <span class="badge-dot dot-mock"></span>
+                    <span class="mode-text" id="mode-text">Đang kiểm tra server...</span>
+                </div>
+                <div class="api-details-container" id="api-details-container"></div>
+                <div class="form-group" style="margin-top: 12px; margin-bottom: 0;">
+                    <label for="select-model" style="font-size: 11px;"><i class="fa-solid fa-brain"></i> Lựa chọn
+                        Model</label>
+                    <select id="select-model"
+                        style="background: rgba(0,0,0,0.45); border: 1px solid var(--border-light); color: var(--text-primary); padding: 8px 10px; border-radius: var(--radius-sm); font-size: 12px; width: 100%; margin-top: 4px; font-family: var(--font-body); outline: none;">
+                        <optgroup label="Google Gemini API (Direct)"
+                            style="background: #0b0f19; color: var(--primary-color);">
+                            <option value="gemini-2.5-flash" style="color: var(--text-primary);">Gemini 2.5 Flash (Tốc
+                                độ)</option>
+                            <option value="gemini-2.5-pro" style="color: var(--text-primary);">Gemini 2.5 Pro (Thông
+                                minh)</option>
+                            <option value="gemini-3.5-flash" style="color: var(--text-primary);">Gemini 3.5 Flash (Mới
+                                nhất)</option>
+                            <option value="gemini-2.0-flash" style="color: var(--text-primary);">Gemini 2.0 Flash
+                            </option>
+                        </optgroup>
+                        <optgroup label="OpenRouter API (Proxy)"
+                            style="background: #0b0f19; color: var(--accent-color);">
+                            <option value="openrouter/google/gemini-2.5-flash" style="color: var(--text-primary);">
+                                Gemini 2.5 Flash (OpenRouter)</option>
+                            <option value="openrouter/google/gemini-2.5-pro" style="color: var(--text-primary);">Gemini
+                                2.5 Pro (OpenRouter)</option>
+                            <option value="openrouter/meta-llama/llama-3.3-70b-instruct:free"
+                                style="color: var(--text-primary);">Llama 3.3 70B (Free)</option>
+                            <option value="openrouter/deepseek/deepseek-chat" style="color: var(--text-primary);">
+                                DeepSeek V3 (OpenRouter)</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <p class="help-text" style="margin-top: 8px;">Cấu hình GEMINI_API_KEY trong file .env ở Backend để kích
+                    hoạt gọi AI thật.</p>
+            </div>
+
+            <!-- Search History -->
+            <div class="sidebar-card saved-trips">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <h3 style="margin-bottom: 0;"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử tra cứu</h3>
+                    <button id="btn-clear-history" title="Xoá lịch sử"
+                        style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px 8px; font-size: 12px; border-radius: var(--radius-sm); transition: var(--transition);">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+                <ul class="trip-list" id="history-list">
+                    <!-- Dynamic history items go here -->
+                </ul>
+            </div>
+
+            <!-- Team Metadata -->
+            <div class="team-footer">
+                <p>Phát triển bởi <strong>ColorOfDreams</strong></p>
+                <div class="team-avatars">
+                    <span title="Trần Văn Huy (Leader)">TVH</span>
+                    <span title="Tạ Văn Huân (Dev)">TVH</span>
+                    <span title="Trần Gia Huy (Research)">TGH</span>
+                    <span title="Đinh Nguyễn Nhật Lâm (Tester)">NNL</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Stage 1: Clarifying Form -->
+            <section class="stage-section active" id="stage-clarify">
+                <div class="welcome-header">
+                    <h2>Bắt đầu hành trình của bạn</h2>
+                    <p>Trả lời vài câu hỏi nhanh để AI lập lịch trình đi biển miền Bắc 3 ngày 2 đêm được tối ưu hóa cho
+                        riêng bạn.</p>
+                </div>
+
+                <form id="clarify-form" class="glass-panel form-grid">
+                    <div class="form-group col-6">
+                        <label for="param-origin"><i class="fa-solid fa-location-crosshairs"></i> Điểm xuất phát</label>
+                        <select id="param-origin">
+                            <option value="Hà Nội">Hà Nội</option>
+                            <option value="Hưng Yên">Hưng Yên</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label for="param-destination"><i class="fa-solid fa-map-pin"></i> Điểm đến mong muốn</label>
+                        <input type="text" id="param-destination"
+                            placeholder="Ví dụ: Cát Bà, Đà Nẵng, Phú Quốc, Sapa, Đà Lạt..." required>
+                    </div>
+
+
+
+                    <div class="form-group col-6">
+                        <label for="param-budget"><i class="fa-solid fa-wallet"></i> Ngân sách dự kiến (Mỗi
+                            người)</label>
+                        <select id="param-budget">
+                            <option value="1.5 triệu">Dưới 1.5 triệu (Tiết kiệm/Sinh viên)</option>
+                            <option value="2.5 triệu" selected>1.5 - 3 triệu (Hợp lý/Phổ thông)</option>
+                            <option value="5 triệu">Trên 3 triệu (Thoải mái/Nghỉ dưỡng)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label for="param-mood"><i class="fa-solid fa-heart"></i> Phong cách trải nghiệm (Mood)</label>
+                        <select id="param-mood">
+                            <option value="Nghỉ dưỡng, chill chill">Nghỉ dưỡng, thư giãn, ngắm cảnh</option>
+                            <option value="Khám phá, trải nghiệm ẩm thực">Khám phá thiên nhiên, phiêu lưu, hải sản
+                            </option>
+                            <option value="Sống ảo, check-in chụp hình">Chụp ảnh check-in, cafe, địa điểm hot</option>
+                        </select>
+                    </div>
+
+
+
+                    <div class="form-group col-12 custom-input-group">
+                        <label for="param-custom"><i class="fa-solid fa-comment-dots"></i> Yêu cầu đặc biệt khác (Tuỳ
+                            chọn)</label>
+                        <textarea id="param-custom" rows="2"
+                            placeholder="Ví dụ: Muốn đi cùng người yêu, đi ăn hải sản ngon rẻ, hoặc có cảnh báo về phà vé..."></textarea>
+                    </div>
+
+                    <div class="form-actions col-12">
+                        <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-clarify">
+                            <span class="btn-text">Tìm kiếm cung đường biển tối ưu</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Stage 2: Route Selection -->
+            <section class="stage-section" id="stage-routes">
+                <div class="stage-header">
+                    <button class="btn-back" id="btn-back-to-clarify">
+                        <i class="fa-solid fa-chevron-left"></i> Quay lại khảo sát
+                    </button>
+                    <h2>Đề xuất Cung đường Biển tối ưu</h2>
+                    <p>AI đã phân tích các tiêu chí của bạn và đề xuất các lựa chọn tốt nhất. Chọn 1 cung đường để lên
+                        timeline chi tiết.</p>
+                </div>
+
+                <!-- Failure Warning (For impossible inputs) -->
+                <div class="warning-banner" id="failure-warning-card" style="display: none;">
+                    <div class="warning-icon"><i class="fa-solid fa-circle-exclamation fa-beat"></i></div>
+                    <div class="warning-body">
+                        <h4 id="warning-title">Cảnh báo yêu cầu không khả thi!</h4>
+                        <p id="warning-desc">Bạn không thể di chuyển quãng đường quá xa trong thời gian ngắn như vậy. AI
+                            đề xuất đổi hướng sang các địa điểm gần hơn dưới đây.</p>
+                    </div>
+                </div>
+
+                <div class="route-cards-grid" id="routes-container">
+                    <!-- Dynamic Route Cards go here -->
+                    <div class="loader-container" id="routes-loader" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>AI đang phân tích các cung đường biển phù hợp...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stage 3: Detailed Itinerary Workspace -->
+            <section class="stage-section" id="stage-itinerary">
+                <div class="stage-header">
+                    <div class="header-navigation">
+                        <button class="btn-back" id="btn-back-to-routes">
+                            <i class="fa-solid fa-chevron-left"></i> Quay lại chọn cung
+                        </button>
+                        <div class="trip-meta-info">
+                            <span class="meta-tag" id="meta-route-name"><i class="fa-solid fa-map"></i> Cung Cát
+                                Bà</span>
+                            <span class="meta-tag" id="meta-route-vehicle"><i class="fa-solid fa-car"></i> Ô tô tự
+                                lái</span>
+                            <span class="meta-tag" id="meta-route-budget"><i class="fa-solid fa-money-bill-wave"></i>
+                                Ngân sách: ~2.5tr/người</span>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary btn-sm" id="btn-print-trip">
+                            <i class="fa-solid fa-print"></i> In lịch trình
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Itinerary Workspace Layout -->
+                <div class="workspace-grid">
+                    <!-- Left: Timeline Details -->
+                    <div class="workspace-left">
+                        <div class="glass-panel timeline-container">
+                            <div class="timeline-tabs">
+                                <button class="tab-btn active" data-day="1">Ngày 1: Lên đường & Check-in</button>
+                                <button class="tab-btn" data-day="2">Ngày 2: Trải nghiệm & Khám phá</button>
+                                <button class="tab-btn" data-day="3">Ngày 3: Mua quà & Trở về</button>
+                            </div>
+
+                            <div class="timeline-content">
+                                <div class="loader-container" id="itinerary-loader" style="display: none;">
+                                    <div class="spinner"></div>
+                                    <p>AI đang phác thảo timeline chi tiết 3 ngày 2 đêm...</p>
+                                </div>
+
+                                <div class="day-timeline-view active" id="day-1-timeline">
+                                    <!-- Dynamic Timeline Items -->
+                                </div>
+                                <div class="day-timeline-view" id="day-2-timeline">
+                                    <!-- Dynamic Timeline Items -->
+                                </div>
+                                <div class="day-timeline-view" id="day-3-timeline">
+                                    <!-- Dynamic Timeline Items -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Summary, Indicators & Corrections -->
+                    <div class="workspace-right">
+                        <!-- Stat Grid: Cost, Fatigue, Confidence -->
+                        <div class="stats-panel glass-panel">
+                            <h3><i class="fa-solid fa-chart-simple"></i> Chỉ số chuyến đi</h3>
+
+                            <!-- Fatigue Gauge -->
+                            <div class="stat-gauge-item">
+                                <div class="gauge-header">
+                                    <span>Mức độ mệt mỏi dự kiến</span>
+                                    <span class="gauge-value" id="fatigue-val">3/5</span>
+                                </div>
+                                <div class="gauge-bar-wrapper">
+                                    <div class="gauge-bar" id="fatigue-bar"
+                                        style="width: 60%; background: var(--warning-color);"></div>
+                                </div>
+                                <p class="stat-desc" id="fatigue-desc">Mức độ di chuyển vừa phải, phù hợp thể lực trung
+                                    bình.</p>
+                            </div>
+
+                            <!-- Cost Breakdown -->
+                            <div class="cost-breakdown-section">
+                                <div class="cost-total">
+                                    <span>Tổng chi phí ước tính / người</span>
+                                    <strong id="cost-total-val">2.350.000đ</strong>
+                                </div>
+                                <ul class="cost-list" id="cost-breakdown-list">
+                                    <li><span><i class="fa-solid fa-car"></i> Di chuyển (xăng/phà):</span> <strong
+                                            id="cost-transport">600.000đ</strong></li>
+                                    <li><span><i class="fa-solid fa-hotel"></i> Lưu trú (khách sạn/homestay):</span>
+                                        <strong id="cost-hotel">800.000đ</strong></li>
+                                    <li><span><i class="fa-solid fa-utensils"></i> Ăn uống:</span> <strong
+                                            id="cost-food">700.000đ</strong></li>
+                                    <li><span><i class="fa-solid fa-ticket"></i> Vé tham quan & Trải nghiệm:</span>
+                                        <strong id="cost-activities">250.000đ</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Correction Panel (Crucial part of SPEC) -->
+                        <div class="correction-panel glass-panel">
+                            <h3><i class="fa-solid fa-sliders"></i> Tinh chỉnh nhanh lịch trình</h3>
+                            <p class="help-text">Chọn một bộ lọc để AI tinh chỉnh trực tiếp phần lịch trình hiện tại:
+                            </p>
+
+                            <div class="correction-actions">
+                                <button class="btn-correction" data-action="cheaper">
+                                    <span class="icon">💸</span>
+                                    <span class="label">Rẻ hơn chút (Tiết kiệm)</span>
+                                </button>
+                                <button class="btn-correction" data-action="less-tired">
+                                    <span class="icon">☕</span>
+                                    <span class="label">Ít mệt hơn (Chill, nghỉ nhiều)</span>
+                                </button>
+                                <button class="btn-correction" data-action="quieter">
+                                    <span class="icon">⛺</span>
+                                    <span class="label">Biển hoang sơ hơn (Vắng người)</span>
+                                </button>
+                                <button class="btn-correction" data-action="rainy">
+                                    <span class="icon">🌧️</span>
+                                    <span class="label">Đổi phương án nếu trời mưa</span>
+                                </button>
+                            </div>
+
+                            <!-- Custom correction input -->
+                            <div class="custom-correction-input">
+                                <input type="text" id="input-custom-correction"
+                                    placeholder="Nhập yêu cầu sửa đổi riêng (ví dụ: 'Thêm quán hải sản rẻ')...">
+                                <button id="btn-custom-correction"><i class="fa-solid fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Verify Cards (Trust Path) -->
+                        <div class="verify-panel glass-panel">
+                            <h3><i class="fa-solid fa-circle-check"></i> Điểm cần tự kiểm chứng</h3>
+                            <p class="help-text">AI gợi ý dựa trên dữ liệu. Hãy xác minh các điểm quan trọng dưới đây
+                                trước khi đi:</p>
+
+                            <div class="verify-alerts-list" id="verify-alerts-container">
+                                <!-- Dynamic Verify cards -->
+                                <div class="verify-alert-item warning">
+                                    <div class="alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                    <div class="alert-content">
+                                        <h4>Giờ chạy Phà Tuần Châu - Cát Bà</h4>
+                                        <p>Giờ phà có thể thay đổi theo mùa hoặc do thời tiết xấu. Hãy check lại giờ phà
+                                            chạy thực tế để tránh lỡ chuyến.</p>
+                                        <a href="https://www.google.com/maps/search/Ph%C3%A0+Tu%E1%BA%A7n+Ch%C3%A2u"
+                                            target="_blank" class="verify-link"><i
+                                                class="fa-solid fa-map-location-dot"></i> Check trên Maps</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Script Source files -->
+    <script src="app.js"></script>
+</body>
+
+</html>
